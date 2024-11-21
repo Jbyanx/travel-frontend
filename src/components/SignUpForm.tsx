@@ -128,6 +128,13 @@ export default function SignupForm() {
             <p className="text-green-500">¡Registro exitoso! Serás redirigido al inicio de sesión en unos segundos.</p>
           </div>
         )}
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            ¿Ya tienes cuenta?{' '}
+            <Link to="/login" className="text-blue-500 hover:text-blue-700">Inicia sesión</Link>
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

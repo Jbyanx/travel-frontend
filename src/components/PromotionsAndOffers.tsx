@@ -19,7 +19,6 @@ const PromotionsAndOffers: React.FC = () => {
             <CardContent>
               <p>{promo.description}</p>
               <p className="text-2xl font-bold text-blue-600 mt-2">{promo.price}</p>
-              <Button className="mt-4" variant="outline">Ver oferta</Button>
             </CardContent>
           </Card>
         ))}

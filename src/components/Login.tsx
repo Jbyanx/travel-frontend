@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Button } from "../components/ui/Button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/Card"
-import { Input } from "../components/ui/Input"
-import { Label } from "../components/ui/Label"
-import { Alert, AlertDescription, AlertTitle } from "../components/ui/Alert"
-import { Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom' // Importa Link para la navegación
+import { Button } from "../components/ui/Button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
+import { Label } from "../components/ui/Label";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/Alert";
+import { Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from './contexts/AuthContext';
 
 interface LoginData {
   correoElectronico: string;
@@ -13,7 +14,7 @@ interface LoginData {
 }
 
 interface JwtResponse {
-  jwtToken: string;
+  token: string;
   type: string;
   username: string;
   roles: string[];
@@ -25,9 +26,11 @@ const Login: React.FC = () => {
     password: '',
   });
 
-  const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,22 +48,32 @@ const Login: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(loginData),
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.text(); // Lee la respuesta como texto
+        const errorData = await response.text();
         throw new Error(errorData || 'Error al iniciar sesión');
       }
-  
-      const data = await response.json(); // Aquí ya debería ser un JSON válido
-      setToken(data.jwtToken);
-      console.log('Token JWT:', data.jwtToken);
+
+      const data: JwtResponse = await response.json();
+      if (data.token) {
+        const role = data.roles.includes('ROLE_ADMIN') ? 'ROLE_ADMIN' : 'ROLE_USER';
+        login(data.token, loginData.correoElectronico, data.roles);
+        if (role === 'ROLE_ADMIN') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        throw new Error('Token JWT no encontrado en la respuesta');
+      }
+      
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       setError((error as Error).message || 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
     }
-  };  
+  };
 
   return (
     <Card className="w-[350px] mx-auto mt-10">
@@ -113,12 +126,6 @@ const Login: React.FC = () => {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      {token && (
-        <Alert className="mt-4">
-          <AlertTitle>Inicio de sesión exitoso</AlertTitle>
-          <AlertDescription className="truncate">Token: {token}</AlertDescription>
-        </Alert>
-      )}
       <CardFooter className="flex justify-center mt-4">
         <p>
           ¿Aún no tienes cuenta?{' '}
@@ -132,3 +139,4 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
