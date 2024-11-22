@@ -8,24 +8,8 @@ import { Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 
-interface LoginData {
-  correoElectronico: string;
-  password: string;
-}
-
-interface JwtResponse {
-  token: string;
-  type: string;
-  username: string;
-  roles: string[];
-}
-
 const Login: React.FC = () => {
-  const [loginData, setLoginData] = useState<LoginData>({
-    correoElectronico: '',
-    password: '',
-  });
-
+  const [loginData, setLoginData] = useState({ correoElectronico: '', password: '' });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,8 +17,7 @@ const Login: React.FC = () => {
   const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setLoginData({ ...loginData, [name]: value });
+    setLoginData({ ...loginData, [e.target.name]: e.target.value });
     setError(null);
   };
 
@@ -42,6 +25,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
     try {
       const response = await fetch('http://localhost:8080/api/v1/auth/login', {
         method: 'POST',
@@ -50,26 +34,15 @@ const Login: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Error al iniciar sesión');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Credenciales incorrectas');
       }
 
-      const data: JwtResponse = await response.json();
-      if (data.token) {
-        const role = data.roles.includes('ROLE_ADMIN') ? 'ROLE_ADMIN' : 'ROLE_USER';
-        login(data.token, loginData.correoElectronico, data.roles);
-        if (role === 'ROLE_ADMIN') {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
-      } else {
-        throw new Error('Token JWT no encontrado en la respuesta');
-      }
-      
+      const { token, roles } = await response.json();
+      login(token, loginData.correoElectronico, roles);
+      navigate(roles.includes('ROLE_ADMIN') ? '/admin' : '/dashboard');
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
-      setError((error as Error).message || 'Error al iniciar sesión');
+      setError((error as Error).message || 'Error inesperado');
     } finally {
       setIsLoading(false);
     }
@@ -79,7 +52,7 @@ const Login: React.FC = () => {
     <Card className="w-[350px] mx-auto mt-10">
       <CardHeader>
         <CardTitle>Iniciar Sesión</CardTitle>
-        <CardDescription>Ingresa tus credenciales para acceder</CardDescription>
+        <CardDescription>Ingresa tus credenciales</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
@@ -91,7 +64,9 @@ const Login: React.FC = () => {
                 name="correoElectronico"
                 type="email"
                 placeholder="tu@email.com"
+                value={loginData.correoElectronico}
                 onChange={handleChange}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -101,7 +76,9 @@ const Login: React.FC = () => {
                 id="password"
                 name="password"
                 type="password"
+                value={loginData.password}
                 onChange={handleChange}
+                disabled={isLoading}
                 required
               />
             </div>
@@ -139,4 +116,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-

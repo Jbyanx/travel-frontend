@@ -62,7 +62,7 @@ const PopularDestinations: React.FC = () => {
             <div key={index} className="flex-none w-64">
               <div className="relative">
                 <img
-                  src={`/placeholder.svg?height=300&width=400&text=${city}`}
+                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Taipei_Skyline_2015.jpg/800px-Taipei_Skyline_2015.jpg"
                   alt={city}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
                 />

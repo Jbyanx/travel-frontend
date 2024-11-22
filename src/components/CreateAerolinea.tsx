@@ -32,11 +32,11 @@ const CreateAerolinea = ({ api, setError }: { api: any, setError: React.Dispatch
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Crear Aerolínea</h2>
+    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg mx-auto">
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Crear Aerolínea</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <Label htmlFor="nombre">Nombre de la Aerolínea:</Label>
+          <Label htmlFor="nombre" className="text-gray-700 dark:text-gray-300">Nombre de la Aerolínea:</Label>
           <Input
             type="text"
             id="nombre"
@@ -45,11 +45,12 @@ const CreateAerolinea = ({ api, setError }: { api: any, setError: React.Dispatch
             onChange={handleChange}
             required
             maxLength={100}
+            className="bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md p-2"
           />
         </div>
 
         <div className="mb-4">
-          <Label htmlFor="codigo">Código:</Label>
+          <Label htmlFor="codigo" className="text-gray-700 dark:text-gray-300">Código:</Label>
           <Input
             type="text"
             id="codigo"
@@ -57,11 +58,12 @@ const CreateAerolinea = ({ api, setError }: { api: any, setError: React.Dispatch
             value={airlineData.codigo}
             onChange={handleChange}
             required
+            className="bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md p-2"
           />
         </div>
 
         <div className="mb-4">
-          <Label htmlFor="pais">País:</Label>
+          <Label htmlFor="pais" className="text-gray-700 dark:text-gray-300">País:</Label>
           <Input
             type="text"
             id="pais"
@@ -70,10 +72,11 @@ const CreateAerolinea = ({ api, setError }: { api: any, setError: React.Dispatch
             onChange={handleChange}
             required
             maxLength={100}
+            className="bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-md p-2"
           />
         </div>
 
-        <Button type="submit" className="mt-4">
+        <Button type="submit" className="mt-4 bg-blue-500 text-white hover:bg-blue-600">
           Crear Aerolínea
         </Button>
       </form>

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
-import { AxiosInstance } from 'axios'
-import { Button } from "../components/ui/Button"
-import { Input } from "../components/ui/Input"
-import { Label } from "../components/ui/Label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/Select"
+import React, { useState, useEffect } from 'react';
+import { AxiosInstance } from 'axios';
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Label } from "../components/ui/Label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/Select";
 
 interface Flight {
   id: number;
@@ -15,9 +15,10 @@ interface Flight {
 interface ReservationFormProps {
   api: AxiosInstance;
   setError: (error: string | null) => void;
+  onSuccess?: () => void;
 }
 
-export function ReservationForm({ api, setError }: ReservationFormProps) {
+export function ReservationForm({ api, setError, onSuccess }: ReservationFormProps) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [selectedFlight, setSelectedFlight] = useState<number | null>(null);
   const [passengerCount, setPassengerCount] = useState<number>(1);
@@ -49,20 +50,31 @@ export function ReservationForm({ api, setError }: ReservationFormProps) {
       });
       setError(null);
       alert('Reservation created successfully');
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       setError('Failed to create reservation');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form 
+      onSubmit={handleSubmit} 
+      className="p-6 space-y-6 bg-white rounded-lg shadow-md max-w-lg mx-auto"
+      style={{ fontFamily: 'Arial, sans-serif' }}
+    >
+      <h2 className="text-2xl font-semibold text-gray-700">Make a Reservation</h2>
+
       <div>
-        <Label htmlFor="flight">Select Flight</Label>
+        <Label htmlFor="flight" className="block mb-2 text-gray-600">
+          Select Flight
+        </Label>
         <Select onValueChange={(value) => setSelectedFlight(Number(value))}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-300">
             <SelectValue placeholder="Select a flight" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white shadow-lg rounded-md">
             {flights.map((flight) => (
               <SelectItem key={flight.id} value={flight.id.toString()}>
                 {flight.flightNumber} - {flight.origin} to {flight.destination}
@@ -71,17 +83,27 @@ export function ReservationForm({ api, setError }: ReservationFormProps) {
           </SelectContent>
         </Select>
       </div>
+
       <div>
-        <Label htmlFor="passengerCount">Number of Passengers</Label>
+        <Label htmlFor="passengerCount" className="block mb-2 text-gray-600">
+          Number of Passengers
+        </Label>
         <Input
           id="passengerCount"
           type="number"
           min="1"
           value={passengerCount}
           onChange={(e) => setPassengerCount(Number(e.target.value))}
+          className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-300"
         />
       </div>
-      <Button type="submit">Make Reservation</Button>
+
+      <Button 
+        type="submit" 
+        className="w-full p-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700"
+      >
+        Make Reservation
+      </Button>
     </form>
-  )
+  );
 }

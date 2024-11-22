@@ -5,7 +5,7 @@ import Navigation from './components/Navigation'
 import Login from './components/Login'
 import SignupForm from './components/SignUpForm'
 import { UserDashboard } from './components/UserDashboard'
-import Admin from './components/Admin'
+import Admin from './components/AdminDashboard'
 import Footer from './components/Footer'
 import PromotionsAndOffers from './components/PromotionsAndOffers'
 import PopularDestinations from './components/PopularDestinations'
@@ -31,7 +31,7 @@ const Hero = () => (
     <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
       <img
         className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-        src="/placeholder.svg?height=1080&width=1920"
+        src="https://ibiza.travel/wp-content/uploads/2017/09/avion-despegando.jpg"
         alt="Avión despegando"
       />
     </div>

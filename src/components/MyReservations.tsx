@@ -4,6 +4,8 @@ import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/Table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../components/ui/Dialog"
+import { ReservationForm } from './ReservationForm'
+import { cn } from "./lib/utils"
 
 interface Reservation {
   id: number;
@@ -20,6 +22,7 @@ interface MyReservationsProps {
 export function MyReservations({ api, setError }: MyReservationsProps) {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [editingReservation, setEditingReservation] = useState<Reservation | null>(null);
+  const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchReservations();
@@ -56,6 +59,27 @@ export function MyReservations({ api, setError }: MyReservationsProps) {
 
   return (
     <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">My Reservations</h2>
+        <Dialog open={isNewReservationDialogOpen} onOpenChange={setIsNewReservationDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>New Reservation</Button>
+          </DialogTrigger>
+          <DialogContent className={cn("bg-background", "dark:bg-gray-800")}>
+            <DialogHeader>
+              <DialogTitle>Create New Reservation</DialogTitle>
+            </DialogHeader>
+            <ReservationForm 
+              api={api} 
+              setError={setError} 
+              onSuccess={() => {
+                setIsNewReservationDialogOpen(false);
+                fetchReservations();
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -76,7 +100,7 @@ export function MyReservations({ api, setError }: MyReservationsProps) {
                   <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => setEditingReservation(reservation)}>Edit</Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className={cn("bg-background", "dark:bg-gray-800")}>
                     <DialogHeader>
                       <DialogTitle>Edit Reservation</DialogTitle>
                     </DialogHeader>
@@ -112,3 +136,4 @@ export function MyReservations({ api, setError }: MyReservationsProps) {
     </div>
   )
 }
+

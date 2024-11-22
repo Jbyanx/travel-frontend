@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/Tabs";
-import { Alert, AlertDescription, AlertTitle } from "../components/ui/Alert";
-import { MyReservations } from './MyReservations';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/Tabs";
+import { Alert, AlertDescription, AlertTitle } from './ui/Alert';
 import { AirportList } from './AirportList';
 import { AirlineList } from './AirlineList';
+import { FlightList } from './FlightList';
 
-export function UserDashboard() {
+export function AdminDashboard() {
   const { token, userRole } = useAuth(); // Consume el AuthContext
   const [error, setError] = useState<string | null>(null);
 
@@ -20,25 +20,29 @@ export function UserDashboard() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Dashboard de Usuario</h1>
+      <h1 className="text-2xl font-bold mb-4">Dashboard de Administrador</h1>
       {error && (
         <Alert className="mb-4">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <Tabs defaultValue="myReservations" className="w-full">
+
+      <Tabs defaultValue="flights" className="w-full">
         <TabsList>
-          <TabsTrigger value="myReservations">Mis Reservas</TabsTrigger>
+          <TabsTrigger value="flights">Vuelos</TabsTrigger>
           <TabsTrigger value="airports">Aeropuertos</TabsTrigger>
           <TabsTrigger value="airlines">Aerolíneas</TabsTrigger>
         </TabsList>
-        <TabsContent value="myReservations">
-          <MyReservations api={api} setError={setError} />
+
+        <TabsContent value="flights">
+          <FlightList api={api} setError={setError} />
         </TabsContent>
+
         <TabsContent value="airports">
           <AirportList api={api} setError={setError} userRole={userRole} /> {/* Pasar userRole */}
         </TabsContent>
+
         <TabsContent value="airlines">
           <AirlineList api={api} setError={setError} />
         </TabsContent>
