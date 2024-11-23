@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Label } from './ui/Label';
 import { Alert, AlertDescription, AlertTitle } from './ui/Alert';
+import { AxiosInstance } from 'axios';
 
-const CreateAeropuerto = ({ setError }: { setError: React.Dispatch<React.SetStateAction<string | null>> }) => {
-  const { token, userRole } = useAuth();
+const CreateAeropuerto = ({
+  api,
+  setError,
+  onSuccess
+}: {
+  api: AxiosInstance;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  onSuccess: () => void;
+}) => {
+  const { token, userRole } = useAuth(); // Obtenemos token y rol desde el contexto
   const [airportData, setAirportData] = useState({
     nombre: '',
     ciudad: '',
     pais: ''
   });
   const [localError, setLocalError] = useState<string | null>(null);
-
-  const api = axios.create({
-    baseURL: 'http://localhost:8080/api/v1',
-    headers: { 'Content-Type': 'application/json' }
-  });
-
-  useEffect(() => {
-    if (userRole !== 'ROLE_ADMIN') {
-      setLocalError('No tienes permisos para acceder a esta funcionalidad.');
-    }
-  }, [userRole]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,38 +31,35 @@ const CreateAeropuerto = ({ setError }: { setError: React.Dispatch<React.SetStat
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Verifica si el token está presente
     if (!token) {
       setError('No se encontró un token válido. Por favor, inicia sesión.');
       return;
     }
 
-    if (userRole !== 'ROLE_ADMIN') {
+    // Verifica si el usuario tiene el rol adecuado
+    if (!userRole || !userRole.includes('ROLE_ADMIN')) {
       setError('No tienes permisos para realizar esta acción.');
       return;
     }
 
     try {
+      // Enviar la solicitud POST con el token en la cabecera de autenticación
       const response = await api.post('/aeropuertos', airportData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('Respuesta del servidor:', response.data);
       alert('Aeropuerto creado con éxito');
       setAirportData({ nombre: '', ciudad: '', pais: '' });
+      onSuccess(); // Ejecutamos la función que refresca la lista
     } catch (error) {
       console.error('Error completo:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 401) {
-          setError('No estás autorizado para realizar esta acción. Verifica tu sesión.');
-        } else {
-          setError(`Error al crear el aeropuerto: ${error.response.data.message || 'Intenta nuevamente.'}`);
-        }
-      } else {
-        setError('Ocurrió un error inesperado. Por favor, intenta más tarde.');
-      }
+      setError('Error al crear el aeropuerto. Intenta nuevamente.');
     }
   };
 
-  if (userRole !== 'ROLE_ADMIN') {
+  // Si el rol no es ADMIN, se muestra un mensaje de acceso denegado
+  if (!userRole || !userRole.includes('ROLE_ADMIN')) {
     return (
       <Alert variant="destructive" className="p-4 rounded-md shadow-md bg-red-100 dark:bg-red-800">
         <AlertTitle className="text-red-700 dark:text-red-300">Acceso Denegado</AlertTitle>

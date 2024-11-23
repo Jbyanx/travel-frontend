@@ -4,7 +4,15 @@ import { Input } from "../components/ui/Input";
 import { Label } from "../components/ui/Label";
 import { useAuth } from './contexts/AuthContext';
 
-const CreateAerolinea = ({ api, setError }: { api: any, setError: React.Dispatch<React.SetStateAction<string | null>> }) => {
+const CreateAerolinea = ({
+  api,
+  setError,
+  onSuccess
+}: { 
+  api: any; 
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
+  onSuccess: () => void;  // Recibe la función de éxito para actualizar y redirigir
+}) => {
   const { token } = useAuth();
   const [airlineData, setAirlineData] = useState({
     nombre: '',
@@ -24,6 +32,8 @@ const CreateAerolinea = ({ api, setError }: { api: any, setError: React.Dispatch
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Aerolínea creada con éxito');
+      // Llama a la función onSuccess para hacer algo después de la creación
+      onSuccess();
       // Limpia los campos después de enviar el formulario
       setAirlineData({ nombre: '', codigo: '', pais: '' });
     } catch (error) {

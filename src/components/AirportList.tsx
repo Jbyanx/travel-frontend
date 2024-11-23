@@ -61,7 +61,7 @@ export function AirportList({ api, setError, userRole }: AirportListProps) {
                 setError={setError}
                 onSuccess={() => {
                   setIsCreateDialogOpen(false);
-                  fetchAirports();
+                  fetchAirports(); // Aquí refrescas la lista de aeropuertos
                 }}
               />
             </DialogContent>
@@ -72,9 +72,9 @@ export function AirportList({ api, setError, userRole }: AirportListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>City</TableHead>
-              <TableHead>Country</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Ciudad</TableHead>
+              <TableHead>País</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

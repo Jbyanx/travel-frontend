@@ -1,3 +1,4 @@
+// Contexto de autenticación
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 // Interfaz para el contexto de autenticación
@@ -23,29 +24,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const storedToken = localStorage.getItem('token');
     const storedRole = localStorage.getItem('userRole');
 
-    // Verifica si los datos son válidos
-    if (storedToken && (storedRole === 'ROLE_ADMIN' || storedRole === 'ROLE_USER')) {
+    if (storedToken && storedRole) {
+      // Verifica si el token es válido (puedes agregar lógica de expiración aquí)
       setIsLoggedIn(true);
       setToken(storedToken);
       setUserRole(storedRole);
     } else {
-      logout(); // Limpia datos inválidos
+      logout(); // Si no hay datos válidos, limpia el estado
     }
   }, []);
 
   // Función para iniciar sesión
   const login = (token: string, email: string, roles: string | string[]) => {
-    // Asegúrate de que roles sea un array
     const parsedRoles = Array.isArray(roles) ? roles : [roles];
-
-    // Determina el rol principal del usuario
     const role = parsedRoles.includes('ROLE_ADMIN') ? 'ROLE_ADMIN' : 'ROLE_USER';
 
-    // Almacena los datos en localStorage
     localStorage.setItem('userRole', role);
     localStorage.setItem('token', token);
 
-    // Actualiza el estado del contexto
     setIsLoggedIn(true);
     setToken(token);
     setUserRole(role);

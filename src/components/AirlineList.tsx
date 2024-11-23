@@ -42,6 +42,11 @@ export function AirlineList({ api, setError }: AirlineListProps) {
     }
   };
 
+  const handleSuccess = () => {
+    setIsCreateDialogOpen(false); // Cierra el diálogo de creación
+    fetchAirlines();  // Refresca la lista de aerolíneas
+  };
+
   if (loading) {
     return <div>Loading airlines...</div>;
   }
@@ -62,10 +67,7 @@ export function AirlineList({ api, setError }: AirlineListProps) {
               <CreateAerolinea 
                 api={api} 
                 setError={setError} 
-                onSuccess={() => {
-                  setIsCreateDialogOpen(false);
-                  fetchAirlines();
-                }}
+                onSuccess={handleSuccess}  // Pasa la función handleSuccess
               />
             </DialogContent>
           </Dialog>
