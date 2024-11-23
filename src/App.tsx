@@ -1,15 +1,15 @@
-import React from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
-import { AuthProvider } from './components/contexts/AuthContext'
-import Navigation from './components/Navigation'
-import Login from './components/Login'
-import SignupForm from './components/SignUpForm'
-import { UserDashboard } from './components/UserDashboard'
-import Admin from './components/AdminDashboard'
-import Footer from './components/Footer'
-import PromotionsAndOffers from './components/PromotionsAndOffers'
-import PopularDestinations from './components/PopularDestinations'
-import ProtectedRoute from './components/ProtectedRoute' // Importar el componente ProtectedRoute
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './components/contexts/AuthContext';
+import Navigation from './components/Navigation';
+import Login from './components/Login';
+import SignupForm from './components/SignUpForm';
+import { UserDashboard } from './components/UserDashboard';
+import AdminDashboard from './components/AdminDashboard'; // Importación corregida
+import Footer from './components/Footer';
+import PromotionsAndOffers from './components/PromotionsAndOffers';
+import PopularDestinations from './components/PopularDestinations';
+import ProtectedRoute from './components/ProtectedRoute'; // Importar el componente ProtectedRoute
 
 const Hero = () => (
   <div className="relative bg-gray-900 overflow-hidden">
@@ -36,7 +36,7 @@ const Hero = () => (
       />
     </div>
   </div>
-)
+);
 
 const Home: React.FC = () => (
   <>
@@ -44,7 +44,7 @@ const Home: React.FC = () => (
     <PromotionsAndOffers />
     <PopularDestinations />
   </>
-)
+);
 
 const App: React.FC = () => {
   return (
@@ -56,30 +56,30 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignupForm />} />
-            
+
             {/* Rutas protegidas */}
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute roleRequired="ROLE_USER">
                   <UserDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/admin" 
+            <Route
+              path="/admin"
               element={
-                <ProtectedRoute>
-                  <Admin />
+                <ProtectedRoute roleRequired="ROLE_ADMIN">
+                  <AdminDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
           </Routes>
           <Footer />
         </div>
       </Router>
     </AuthProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;

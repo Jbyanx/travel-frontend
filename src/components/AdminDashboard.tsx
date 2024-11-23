@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/Tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs';
 import { Alert, AlertDescription, AlertTitle } from './ui/Alert';
 import { AirportList } from './AirportList';
 import { AirlineList } from './AirlineList';
 import { FlightList } from './FlightList';
 
-export function AdminDashboard() {
+const AdminDashboard: React.FC = () => {
   const { token, userRole } = useAuth(); // Consume el AuthContext
   const [error, setError] = useState<string | null>(null);
 
   const api = axios.create({
     baseURL: 'http://localhost:8080/api/v1',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -49,4 +49,6 @@ export function AdminDashboard() {
       </Tabs>
     </div>
   );
-}
+};
+
+export default AdminDashboard;  // Exportación por defecto
