@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AirportList } from './AirportList';
 import { AirlineList } from './AirlineList';
 import { FlightList } from './FlightList';
+import { LayoverList } from './LayoverList';
 import { Navigate } from 'react-router-dom';
 
 export function AdminDashboard() {
