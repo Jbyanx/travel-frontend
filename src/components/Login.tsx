@@ -1,118 +1,90 @@
 import React, { useState } from 'react';
-import { Button } from "../components/ui/Button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/Card";
-import { Input } from "../components/ui/Input";
-import { Label } from "../components/ui/Label";
-import { Alert, AlertDescription, AlertTitle } from "../components/ui/Alert";
-import { Loader2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { Button } from "../components/ui/Button"
+import { Input } from "../components/ui/Input"
+import { Label } from "../components/ui/Label"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card"
+import { Alert, AlertDescription } from "../components/ui/Alert"
+import axios from 'axios';
 
-const Login: React.FC = () => {
-  const [loginData, setLoginData] = useState({ correoElectronico: '', password: '' });
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+interface LoginRequest {
+  correoElectronico: string;
+  password: string;
+}
 
-  const navigate = useNavigate();
+interface JwtResponse {
+  token: string;
+  type: string;
+  email: string;
+  roles: string[];
+}
+
+export const Login: React.FC = () => {
   const { login } = useAuth();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value });
-    setError(null);
-  };
+  const [formData, setFormData] = useState<LoginRequest>({ correoElectronico: '', password: '' });
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch('http://localhost:8080/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Credenciales incorrectas');
-      }
-
-      const { token, roles } = await response.json();
-      login(token, loginData.correoElectronico, roles);
-      navigate(roles.includes('ROLE_ADMIN') ? '/admin' : '/dashboard');
-    } catch (error) {
-      setError((error as Error).message || 'Error inesperado');
-    } finally {
-      setIsLoading(false);
+      const response = await axios.post<JwtResponse>('http://localhost:8080/api/v1/auth/login', formData);
+      console.log('Login response:', response.data);
+      login(response.data.token, response.data.roles);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Credenciales incorrectas o error en el servidor.');
     }
   };
 
   return (
-    <Card className="w-[350px] mx-auto mt-10">
-      <CardHeader>
-        <CardTitle>Iniciar Sesión</CardTitle>
-        <CardDescription>Ingresa tus credenciales</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="correoElectronico">Correo electrónico</Label>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">Iniciar Sesión</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="correoElectronico">Correo Electrónico</Label>
               <Input
                 id="correoElectronico"
-                name="correoElectronico"
                 type="email"
-                placeholder="tu@email.com"
-                value={loginData.correoElectronico}
-                onChange={handleChange}
-                disabled={isLoading}
+                value={formData.correoElectronico}
+                onChange={(e) => setFormData({ ...formData, correoElectronico: e.target.value })}
                 required
               />
             </div>
-            <div className="flex flex-col space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
-                name="password"
                 type="password"
-                value={loginData.password}
-                onChange={handleChange}
-                disabled={isLoading}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
             </div>
-          </div>
-          <CardFooter className="flex justify-between mt-4 p-0">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Cargando
-                </>
-              ) : (
-                'Iniciar Sesión'
-              )}
+            <Button type="submit" className="w-full">
+              Iniciar Sesión
             </Button>
-          </CardFooter>
-        </form>
-      </CardContent>
-      {error && (
-        <Alert className="mt-4">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <CardFooter className="flex justify-center mt-4">
-        <p>
-          ¿Aún no tienes cuenta?{' '}
-          <Link to="/signup" className="text-blue-500 hover:text-blue-700">
-            Regístrate
-          </Link>
-        </p>
-      </CardFooter>
-    </Card>
+          </form>
+          <p className="text-center mt-4">
+            ¿No tienes una cuenta?{' '}
+            <a href="/signup" className="text-blue-500 hover:underline">
+              Regístrate
+            </a>
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
-export default Login;

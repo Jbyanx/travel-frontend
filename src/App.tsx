@@ -2,14 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './components/contexts/AuthContext';
 import Navigation from './components/Navigation';
-import Login from './components/Login';
-import SignupForm from './components/SignUpForm';
+import { Login } from './components/Login';
+import { Signup as SignupForm } from './components/SignUpForm';
 import { UserDashboard } from './components/UserDashboard';
-import AdminDashboard from './components/AdminDashboard'; // Importación corregida
+import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 import PromotionsAndOffers from './components/PromotionsAndOffers';
 import PopularDestinations from './components/PopularDestinations';
-import ProtectedRoute from './components/ProtectedRoute'; // Importar el componente ProtectedRoute
+import ProtectedRoute from './components/ProtectedRoute';
 
 const Hero = () => (
   <div className="relative bg-gray-900 overflow-hidden">
@@ -24,6 +24,20 @@ const Hero = () => (
             <p className="mt-3 text-base text-gray-300 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
               Explora nuevos destinos, vive experiencias únicas y crea recuerdos inolvidables con nuestras ofertas de vuelos.
             </p>
+            <div className="mt-5 sm:mt-8 flex justify-center lg:justify-start">
+              <a
+                href="/login"
+                className="rounded-md shadow bg-blue-500 text-white px-6 py-3 text-base font-medium hover:bg-blue-600"
+              >
+                Iniciar Sesión
+              </a>
+              <a
+                href="/signup"
+                className="ml-4 rounded-md shadow bg-gray-200 text-gray-900 px-6 py-3 text-base font-medium hover:bg-gray-300"
+              >
+                Registrarse
+              </a>
+            </div>
           </div>
         </main>
       </div>
@@ -83,3 +97,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

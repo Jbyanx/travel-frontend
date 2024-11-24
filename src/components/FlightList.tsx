@@ -1,44 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/Table';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
-import { Alert, AlertDescription } from './ui/Alert';
-import { Button } from './ui/Button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/Dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/Dialog';
+import { Pencil, Trash2 } from 'lucide-react';
 import CreateVuelo from './CreateVuelo';
+import EditVuelo from './EditVuelo';
 
 interface Airport {
-    id: number;
-    nombre: string;
-    ciudad: string;
-    pais: string;
+  id: number;
+  nombre: string;
+  ciudad: string;
+  pais: string;
 }
 
 interface Escala {
-    id: number;
-    aeropuerto: Airport;
-    duracion: string;
+  id: number;
+  aeropuerto: Airport;
+  duracion: string;
 }
 
-interface Getvuelo {
-    id: number;
-    origen: string;
-    destino: string;
-    fechaSalida: string;
-    horaSalida: string;
-    duracion: string;
-    capacidad: number;
-    aerolinea: string;
-    aeropuertoOrigen: Airport;
-    aeropuertoDestino: Airport;
-    escalas: Escala[];
+interface Vuelo {
+  id: number;
+  origen: string;
+  destino: string;
+  fechaSalida: string;
+  horaSalida: string;
+  duracion: string;
+  capacidad: number;
+  aerolinea: string;
+  aeropuertoOrigen: Airport;
+  aeropuertoDestino: Airport;
+  escalas: Escala[];
 }
 
-export function FlightList({ api, setError }) {
-  const [vuelos, setVuelos] = useState<Getvuelo[]>([]);
+export function FlightList({ api, setError }: { api: any; setError: React.Dispatch<React.SetStateAction<string | null>> }) {
+  const [vuelos, setVuelos] = useState<Vuelo[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingVuelo, setEditingVuelo] = useState<Vuelo | null>(null);
+  const { userRole } = useAuth();
 
   useEffect(() => {
     fetchVuelos();
@@ -56,6 +60,19 @@ export function FlightList({ api, setError }) {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this flight?')) {
+      try {
+        await api.delete(`/vuelos/${id}`);
+        setError(null);
+        fetchVuelos();
+      } catch (error) {
+        console.error('Error deleting flight:', error);
+        setError('Failed to delete flight. Please try again later.');
+      }
+    }
+  };
+
   if (loading) {
     return <div>Loading flights...</div>;
   }
@@ -64,27 +81,29 @@ export function FlightList({ api, setError }) {
     <Card className="w-full max-w-4xl mx-auto mt-8">
       <CardHeader className="flex justify-between items-center">
         <CardTitle>Lista de vuelos y Escalas</CardTitle>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Crear Vuelo</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Crear Nuevo Vuelo</DialogTitle>
-            </DialogHeader>
-            <CreateVuelo 
-              api={api} 
-              setError={setError} 
-              onSuccess={() => {
-                setIsCreateDialogOpen(false);
-                fetchVuelos();
-              }}
-            />
-          </DialogContent>
-        </Dialog>
+        {userRole === 'ROLE_ADMIN' && (
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>Crear Vuelo</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Crear Nuevo Vuelo</DialogTitle>
+              </DialogHeader>
+              <CreateVuelo 
+                api={api} 
+                setError={setError} 
+                onSuccess={() => {
+                  setIsCreateDialogOpen(false);
+                  fetchVuelos();
+                }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
       </CardHeader>
       <CardContent>
-        <table>
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Vuelo origen</TableHead>
@@ -95,6 +114,7 @@ export function FlightList({ api, setError }) {
               <TableHead>Aeropuerto origen</TableHead>
               <TableHead>Aeropuerto destino</TableHead>
               <TableHead>Duracion / Escala</TableHead>
+              {userRole === 'ROLE_ADMIN' && <TableHead>Acciones</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -109,6 +129,21 @@ export function FlightList({ api, setError }) {
                   <TableCell>{vuelo.aeropuertoOrigen.nombre} ({vuelo.aeropuertoOrigen.ciudad}, {vuelo.aeropuertoOrigen.pais})</TableCell>
                   <TableCell>{vuelo.aeropuertoDestino.nombre} ({vuelo.aeropuertoDestino.ciudad}, {vuelo.aeropuertoDestino.pais})</TableCell>
                   <TableCell>{vuelo.escalas.length > 0 ? `${vuelo.escalas.length} escalas(s)` : `Duración: ${vuelo.duracion}`}</TableCell>
+                  {userRole === 'ROLE_ADMIN' && (
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setEditingVuelo(vuelo);
+                        setIsEditDialogOpen(true);
+                      }}>
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDelete(vuelo.id)} className="ml-2">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
                 {vuelo.escalas.map((escala) => (
                   <TableRow key={`escala-${escala.id}`}>
@@ -120,8 +155,28 @@ export function FlightList({ api, setError }) {
               </React.Fragment>
             ))}
           </TableBody>
-        </table>
+        </Table>
       </CardContent>
+      {userRole === 'ROLE_ADMIN' && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Vuelo</DialogTitle>
+            </DialogHeader>
+            {editingVuelo && (
+              <EditVuelo
+                api={api}
+                setError={setError}
+                vuelo={editingVuelo}
+                onSuccess={() => {
+                  setIsEditDialogOpen(false);
+                  fetchVuelos();
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 }

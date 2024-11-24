@@ -2,57 +2,55 @@ import React, { useState } from 'react';
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Label } from "../components/ui/Label";
-import { useAuth } from './contexts/AuthContext';
+import { AxiosInstance } from 'axios';
 
-const CreateAerolinea = ({
-  api,
-  setError,
-  onSuccess
-}: { 
-  api: any; 
-  setError: React.Dispatch<React.SetStateAction<string | null>>;
+interface Airport {
+  id: number;
+  nombre: string;
+  ciudad: string;
+  pais: string;
+}
+
+interface EditAeropuertoProps {
+  api: AxiosInstance;
+  setError: (error: string | null) => void;
+  airport: Airport;
   onSuccess: () => void;
-}) => {
-  const { token, userRole } = useAuth();
-  const [airlineData, setAirlineData] = useState({
-    nombre: '',
-    codigo: '',
-    pais: ''
+}
+
+const EditAeropuerto: React.FC<EditAeropuertoProps> = ({ api, setError, airport, onSuccess }) => {
+  const [airportData, setAirportData] = useState({
+    nombre: airport.nombre,
+    ciudad: airport.ciudad,
+    pais: airport.pais
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setAirlineData({ ...airlineData, [name]: value });
+    setAirportData({ ...airportData, [name]: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (userRole !== 'ROLE_ADMIN') {
-      setError('No tienes permisos para realizar esta acción.');
-      return;
-    }
     try {
-      await api.post('/aerolineas', airlineData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Aerolínea creada con éxito');
+      await api.put(`/aeropuertos/${airport.id}`, airportData);
+      alert('Aeropuerto actualizado con éxito');
       onSuccess();
-      setAirlineData({ nombre: '', codigo: '', pais: '' });
     } catch (error) {
-      console.error('Error creating airline:', error);
-      setError('Error al crear la aerolínea.');
+      console.error('Error updating airport:', error);
+      setError('Error al actualizar el aeropuerto.');
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4">
-        <Label htmlFor="nombre">Nombre de la Aerolínea:</Label>
+        <Label htmlFor="nombre">Nombre del Aeropuerto:</Label>
         <Input
           type="text"
           id="nombre"
           name="nombre"
-          value={airlineData.nombre}
+          value={airportData.nombre}
           onChange={handleChange}
           required
           maxLength={100}
@@ -60,14 +58,15 @@ const CreateAerolinea = ({
       </div>
 
       <div className="mb-4">
-        <Label htmlFor="codigo">Código:</Label>
+        <Label htmlFor="ciudad">Ciudad:</Label>
         <Input
           type="text"
-          id="codigo"
-          name="codigo"
-          value={airlineData.codigo}
+          id="ciudad"
+          name="ciudad"
+          value={airportData.ciudad}
           onChange={handleChange}
           required
+          maxLength={100}
         />
       </div>
 
@@ -77,7 +76,7 @@ const CreateAerolinea = ({
           type="text"
           id="pais"
           name="pais"
-          value={airlineData.pais}
+          value={airportData.pais}
           onChange={handleChange}
           required
           maxLength={100}
@@ -85,11 +84,11 @@ const CreateAerolinea = ({
       </div>
 
       <Button type="submit" className="mt-4">
-        Crear Aerolínea
+        Actualizar Aeropuerto
       </Button>
     </form>
   );
 };
 
-export default CreateAerolinea;
+export default EditAeropuerto;
 

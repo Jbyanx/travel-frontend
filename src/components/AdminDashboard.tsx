@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from './contexts/AuthContext';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/Tabs';
-import { Alert, AlertDescription, AlertTitle } from './ui/Alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/Alert';
 import { AirportList } from './AirportList';
 import { AirlineList } from './AirlineList';
 import { FlightList } from './FlightList';
+import { Navigate } from 'react-router-dom';
 
-const AdminDashboard: React.FC = () => {
-  const { token, userRole } = useAuth(); // Consume el AuthContext
+export function AdminDashboard() {
+  const { token, userRole } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const api = axios.create({
@@ -16,7 +17,19 @@ const AdminDashboard: React.FC = () => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  });
+});
+
+  if (!userRole || !userRole.includes('ROLE_ADMIN')) {
+    return (
+      <div>
+        <Alert className="mb-4">
+          <AlertTitle>Acceso Denegado</AlertTitle>
+          <AlertDescription>No tienes permisos para acceder a este contenido. Contacta al administrador.</AlertDescription>
+        </Alert>
+        <Navigate to="/login" replace />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -31,6 +44,7 @@ const AdminDashboard: React.FC = () => {
       <Tabs defaultValue="flights" className="w-full">
         <TabsList>
           <TabsTrigger value="flights">Vuelos</TabsTrigger>
+          <TabsTrigger value="layovers">Escalas</TabsTrigger>
           <TabsTrigger value="airports">Aeropuertos</TabsTrigger>
           <TabsTrigger value="airlines">Aerolíneas</TabsTrigger>
         </TabsList>
@@ -39,8 +53,12 @@ const AdminDashboard: React.FC = () => {
           <FlightList api={api} setError={setError} />
         </TabsContent>
 
+        <TabsContent value="layovers">
+          <LayoverList api={api} setError={setError} />
+        </TabsContent>
+
         <TabsContent value="airports">
-          <AirportList api={api} setError={setError} userRole={userRole} /> {/* Pasar userRole */}
+          <AirportList api={api} setError={setError} userRole={userRole} />
         </TabsContent>
 
         <TabsContent value="airlines">
@@ -49,6 +67,7 @@ const AdminDashboard: React.FC = () => {
       </Tabs>
     </div>
   );
-};
+}
 
-export default AdminDashboard;  // Exportación por defecto
+export default AdminDashboard;
+

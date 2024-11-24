@@ -136,4 +136,3 @@ export function MyReservations({ api, setError }: MyReservationsProps) {
     </div>
   )
 }
-

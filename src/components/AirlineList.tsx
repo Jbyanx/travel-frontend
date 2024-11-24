@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from './contexts/AuthContext';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/Table";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
-import { Alert, AlertDescription } from "../components/ui/Alert";
-import { Button } from "./ui/Button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/Dialog";
-import CreateAerolinea from './CreateAerolinea';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useAuth } from './contexts/AuthContext'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/Table"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card"
+import { Alert, AlertDescription } from "../components/ui/Alert"
+import { Button } from "./ui/Button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/Dialog"
+import { Pencil, Trash2 } from 'lucide-react'
+import CreateAerolinea from './CreateAerolinea'
+import EditAerolinea from './EditAerolinea'
 
 interface Airline {
   id: number;
@@ -15,16 +17,20 @@ interface Airline {
   pais: string;
 }
 
+import { Dispatch, SetStateAction } from 'react';
+
 interface AirlineListProps {
   api: any;
-  setError: (error: string | null) => void;
+  setError: Dispatch<SetStateAction<string | null>>;
 }
 
 export function AirlineList({ api, setError }: AirlineListProps) {
-  const { userRole } = useAuth(); // Consumir userRole del contexto
+  const { userRole, token } = useAuth();
   const [airlines, setAirlines] = useState<Airline[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingAirline, setEditingAirline] = useState<Airline | null>(null);
 
   useEffect(() => {
     fetchAirlines();
@@ -32,7 +38,9 @@ export function AirlineList({ api, setError }: AirlineListProps) {
 
   const fetchAirlines = async () => {
     try {
-      const response = await api.get('/aerolineas');
+      const response = await api.get('/aerolineas', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setAirlines(response.data);
       setLoading(false);
     } catch (error) {
@@ -42,9 +50,24 @@ export function AirlineList({ api, setError }: AirlineListProps) {
     }
   };
 
-  const handleSuccess = () => {
-    setIsCreateDialogOpen(false); // Cierra el diálogo de creación
-    fetchAirlines();  // Refresca la lista de aerolíneas
+  const handleEdit = (airline: Airline) => {
+    setEditingAirline(airline);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this airline?')) {
+      try {
+        await api.delete(`/aerolineas/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        alert('Airline deleted successfully');
+        fetchAirlines();
+      } catch (error) {
+        console.error('Error deleting airline:', error);
+        setError('Failed to delete airline. Please try again later.');
+      }
+    }
   };
 
   if (loading) {
@@ -55,7 +78,7 @@ export function AirlineList({ api, setError }: AirlineListProps) {
     <Card className="w-full max-w-4xl mx-auto mt-8">
       <CardHeader className="flex justify-between items-center">
         <CardTitle>Lista de Aerolíneas</CardTitle>
-        {userRole === 'ROLE_ADMIN' && ( // Renderizar el botón solo si el rol es ADMIN
+        {userRole === 'ROLE_ADMIN' && (
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>Crear Aerolínea</Button>
@@ -67,7 +90,10 @@ export function AirlineList({ api, setError }: AirlineListProps) {
               <CreateAerolinea 
                 api={api} 
                 setError={setError} 
-                onSuccess={handleSuccess}  // Pasa la función handleSuccess
+                onSuccess={() => {
+                  setIsCreateDialogOpen(false);
+                  fetchAirlines();
+                }}
               />
             </DialogContent>
           </Dialog>
@@ -81,6 +107,7 @@ export function AirlineList({ api, setError }: AirlineListProps) {
                 <TableHead>Nombre</TableHead>
                 <TableHead>Código</TableHead>
                 <TableHead>País</TableHead>
+                {userRole === 'ROLE_ADMIN' && <TableHead>Acciones</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -89,6 +116,18 @@ export function AirlineList({ api, setError }: AirlineListProps) {
                   <TableCell>{airline.nombre}</TableCell>
                   <TableCell>{airline.codigo}</TableCell>
                   <TableCell>{airline.pais}</TableCell>
+                  {userRole === 'ROLE_ADMIN' && (
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(airline)}>
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(airline.id)} className="ml-2">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
@@ -99,6 +138,27 @@ export function AirlineList({ api, setError }: AirlineListProps) {
           </Alert>
         )}
       </CardContent>
+      {userRole === 'ROLE_ADMIN' && (
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Aerolínea</DialogTitle>
+            </DialogHeader>
+            {editingAirline && (
+              <EditAerolinea
+                api={api}
+                setError={setError}
+                airline={editingAirline}
+                onSuccess={() => {
+                  setIsEditDialogOpen(false);
+                  fetchAirlines();
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
-  );
+  )
 }
+

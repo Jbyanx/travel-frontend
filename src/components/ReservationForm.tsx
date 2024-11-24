@@ -32,14 +32,14 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
       const response = await api.get('/vuelos');
       setFlights(response.data);
     } catch (error) {
-      setError('Failed to fetch flights');
+      setError('No se pudo obtener los vuelos');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFlight) {
-      setError('Please select a flight');
+      setError('Por favor, selecciona un vuelo');
       return;
     }
     try {
@@ -49,12 +49,12 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
         numeroDePasajeros: passengerCount
       });
       setError(null);
-      alert('Reservation created successfully');
+      alert('Reserva creada con éxito');
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      setError('Failed to create reservation');
+      setError('No se pudo crear la reserva');
     }
   };
 
@@ -64,20 +64,20 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
       className="p-6 space-y-6 bg-white rounded-lg shadow-md max-w-lg mx-auto"
       style={{ fontFamily: 'Arial, sans-serif' }}
     >
-      <h2 className="text-2xl font-semibold text-gray-700">Make a Reservation</h2>
+      <h2 className="text-2xl font-semibold text-gray-700">Hacer una Reserva</h2>
 
       <div>
         <Label htmlFor="flight" className="block mb-2 text-gray-600">
-          Select Flight
+          Seleccionar Vuelo
         </Label>
         <Select onValueChange={(value) => setSelectedFlight(Number(value))}>
           <SelectTrigger className="w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-300">
-            <SelectValue placeholder="Select a flight" />
+            <SelectValue placeholder="Selecciona un vuelo" />
           </SelectTrigger>
           <SelectContent className="bg-white shadow-lg rounded-md">
             {flights.map((flight) => (
               <SelectItem key={flight.id} value={flight.id.toString()}>
-                {flight.flightNumber} - {flight.origin} to {flight.destination}
+                {flight.flightNumber} - {flight.origin} a {flight.destination}
               </SelectItem>
             ))}
           </SelectContent>
@@ -86,7 +86,7 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
 
       <div>
         <Label htmlFor="passengerCount" className="block mb-2 text-gray-600">
-          Number of Passengers
+          Número de Pasajeros
         </Label>
         <Input
           id="passengerCount"
@@ -102,7 +102,7 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
         type="submit" 
         className="w-full p-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700"
       >
-        Make Reservation
+        Hacer Reserva
       </Button>
     </form>
   );
