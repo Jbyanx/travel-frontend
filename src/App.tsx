@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './components/contexts/AuthContext';
 import Navigation from './components/Navigation';
 import { Login } from './components/Login';
-import { Signup as SignupForm } from './components/SignUpForm';
+import { Signup } from './components/SignUpForm';
 import { UserDashboard } from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
@@ -69,13 +69,13 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignupForm />} />
+            <Route path="/signup" element={<Signup />} />
 
             {/* Rutas protegidas */}
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute roleRequired="ROLE_USER">
+                <ProtectedRoute>
                   <UserDashboard />
                 </ProtectedRoute>
               }

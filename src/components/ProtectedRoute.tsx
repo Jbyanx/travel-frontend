@@ -1,16 +1,25 @@
-// ProtectedRoute.tsx
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';  // Asegúrate de tener el hook 'useAuth' correctamente configurado
+import { useAuth } from './contexts/AuthContext';
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isLoggedIn } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  roleRequired?: string;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roleRequired }) => {
+  const { isLoggedIn, userRole } = useAuth();
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (roleRequired && userRole !== roleRequired) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;
 };
 
 export default ProtectedRoute;
+

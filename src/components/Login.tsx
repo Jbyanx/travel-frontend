@@ -32,7 +32,11 @@ export const Login: React.FC = () => {
       const response = await axios.post<JwtResponse>('http://localhost:8080/api/v1/auth/login', formData);
       console.log('Login response:', response.data);
       login(response.data.token, response.data.roles);
-      navigate('/dashboard');
+      if (response.data.roles.includes('ROLE_ADMIN')) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError('Credenciales incorrectas o error en el servidor.');

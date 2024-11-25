@@ -5,6 +5,7 @@ import { Label } from './ui/Label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/Select';
 import { useAuth } from './contexts/AuthContext';
 import { Alert, AlertDescription, AlertTitle } from './ui/Alert';
+import axios from 'axios';
 
 interface Airline {
   id: number;
@@ -16,7 +17,7 @@ interface Airport {
   nombre: string;
 }
 
-const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<React.SetStateAction<string | null>> }) => {
+const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateAction<string | null>> }) => {
   const { token, userRole } = useAuth();
   const [flightData, setFlightData] = useState({
     origen: '',
@@ -32,6 +33,14 @@ const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<Rea
   const [airlines, setAirlines] = useState<Airline[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  const api = axios.create({
+    baseURL: 'http://localhost:8080/api/v1',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
 
   useEffect(() => {
     if (userRole !== 'ROLE_ADMIN') {
@@ -49,6 +58,7 @@ const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<Rea
         setAirlines(airlineResponse.data);
         setAirports(airportResponse.data);
       } catch (error) {
+        console.error('Error fetching airlines and airports:', error);
         setError('Error al cargar aerolíneas o aeropuertos.');
       }
     };
@@ -77,7 +87,7 @@ const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<Rea
       destino: flightData.destino,
       fechaDeSalida: flightData.fechaDeSalida,
       horaDeSalida: flightData.horaDeSalida,
-      duracion: `PT${flightData.duracion}M`,
+      duracion: { seconds: flightData.duracion * 60 },
       capacidad: flightData.capacidad,
       idAerolinea: flightData.idAerolinea,
       idAeropuertoOrigen: flightData.idAeropuertoOrigen,
@@ -85,9 +95,8 @@ const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<Rea
     };
 
     try {
-      await api.post('/admin/vuelos', saveVueloData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.post('/vuelos', saveVueloData);
+      console.log('Flight created successfully:', response.data);
       alert('Vuelo creado con éxito');
       setFlightData({
         origen: '',
@@ -101,7 +110,15 @@ const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<Rea
         idAeropuertoDestino: 0
       });
     } catch (error) {
-      setError('Error al crear el vuelo.');
+      console.error('Error creating flight:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+        setError(`Error al crear el vuelo: ${error.response.status} ${error.response.statusText}`);
+      } else {
+        setError('Error al crear el vuelo.');
+      }
     }
   };
 
@@ -237,3 +254,4 @@ const CreateVuelo = ({ api, setError }: { api: any, setError: React.Dispatch<Rea
 };
 
 export default CreateVuelo;
+
