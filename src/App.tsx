@@ -1,9 +1,10 @@
 import React from 'react';
+import './styles/globals.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './components/contexts/AuthContext';
 import Navigation from './components/Navigation';
 import { Login } from './components/Login';
-import { Signup } from './components/SignUpForm';
+import { Signup as SignupForm } from './components/SignUpForm';
 import { UserDashboard } from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
@@ -69,13 +70,13 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
+            <Route path="/signup" element={<SignupForm />} />
 
             {/* Rutas protegidas */}
             <Route
               path="/dashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute roleRequired="ROLE_USER">
                   <UserDashboard />
                 </ProtectedRoute>
               }

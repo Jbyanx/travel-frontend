@@ -58,7 +58,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
         setAirlines(airlineResponse.data);
         setAirports(airportResponse.data);
       } catch (error) {
-        console.error('Error fetching airlines and airports:', error);
+        console.error('Error al cargar aerolíneas o aeropuertos:', error);
         setError('Error al cargar aerolíneas o aeropuertos.');
       }
     };
@@ -87,7 +87,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
       destino: flightData.destino,
       fechaDeSalida: flightData.fechaDeSalida,
       horaDeSalida: flightData.horaDeSalida,
-      duracion: { seconds: flightData.duracion * 60 },
+      duracion: `PT${flightData.duracion}M`,
       capacidad: flightData.capacidad,
       idAerolinea: flightData.idAerolinea,
       idAeropuertoOrigen: flightData.idAeropuertoOrigen,
@@ -96,7 +96,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
 
     try {
       const response = await api.post('/vuelos', saveVueloData);
-      console.log('Flight created successfully:', response.data);
+      console.log('Vuelo creado exitosamente:', response.data);
       alert('Vuelo creado con éxito');
       setFlightData({
         origen: '',
@@ -110,11 +110,11 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
         idAeropuertoDestino: 0
       });
     } catch (error) {
-      console.error('Error creating flight:', error);
+      console.error('Error al crear el vuelo:', error);
       if (axios.isAxiosError(error) && error.response) {
-        console.error('Response data:', error.response.data);
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
+        console.error('Datos de la respuesta:', error.response.data);
+        console.error('Estado de la respuesta:', error.response.status);
+        console.error('Encabezados de la respuesta:', error.response.headers);
         setError(`Error al crear el vuelo: ${error.response.status} ${error.response.statusText}`);
       } else {
         setError('Error al crear el vuelo.');
@@ -138,7 +138,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
             onValueChange={(value) => handleChange('idAerolinea', parseInt(value, 10))}
             value={flightData.idAerolinea.toString()}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white text-black">
               <SelectValue placeholder="Seleccione una aerolínea" />
             </SelectTrigger>
             <SelectContent>
@@ -155,12 +155,13 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
           <Label htmlFor="idAeropuertoOrigen">Aeropuerto de Origen</Label>
           <Select
             onValueChange={(value) => {
+              const selectedAirport = airports.find(a => a.id === parseInt(value, 10));
               handleChange('idAeropuertoOrigen', parseInt(value, 10));
-              handleChange('origen', airports.find(a => a.id === parseInt(value, 10))?.nombre || '');
+              handleChange('origen', selectedAirport ? selectedAirport.nombre : '');
             }}
             value={flightData.idAeropuertoOrigen.toString()}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white text-black">
               <SelectValue placeholder="Seleccione aeropuerto de origen" />
             </SelectTrigger>
             <SelectContent>
@@ -177,12 +178,13 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
           <Label htmlFor="idAeropuertoDestino">Aeropuerto de Destino</Label>
           <Select
             onValueChange={(value) => {
+              const selectedAirport = airports.find(a => a.id === parseInt(value, 10));
               handleChange('idAeropuertoDestino', parseInt(value, 10));
-              handleChange('destino', airports.find(a => a.id === parseInt(value, 10))?.nombre || '');
+              handleChange('destino', selectedAirport ? selectedAirport.nombre : '');
             }}
             value={flightData.idAeropuertoDestino.toString()}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-white text-black">
               <SelectValue placeholder="Seleccione aeropuerto de destino" />
             </SelectTrigger>
             <SelectContent>
