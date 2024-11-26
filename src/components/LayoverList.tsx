@@ -50,7 +50,7 @@ export function LayoverList({ api, setError }: LayoverListProps) {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this layover?')) {
+    if (window.confirm('¿Estas seguro de eliminar esta escala?')) {
       try {
         await api.delete(`/escalas/${id}`);
         setError(null);

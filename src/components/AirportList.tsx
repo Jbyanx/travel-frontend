@@ -50,14 +50,15 @@ export function AirportList({ api, setError }: AirportListProps) {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this airport?')) {
+    if (window.confirm('¿Estas seguro de eliminar este aeropuerto?')) {
       try {
         await api.delete(`/aeropuertos/${id}`);
-        alert('Airport deleted successfully');
+        alert('Aeropuerto eliminado satisfactoriamente');
         fetchAirports();
       } catch (error) {
         console.error('Error deleting airport:', error);
         setError('Failed to delete airport. Please try again later.');
+        alert("Error al eliminar aeropuerto con vuelos y reservas asociadas");
       }
     }
   };

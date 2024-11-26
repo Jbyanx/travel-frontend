@@ -61,7 +61,7 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this flight?')) {
+    if (window.confirm('¿Estas seguro de eliminar este vuelo?')) {
       try {
         await api.delete(`/vuelos/${id}`);
         setError(null);
@@ -69,6 +69,7 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
       } catch (error) {
         console.error('Error deleting flight:', error);
         setError('Failed to delete flight. Please try again later.');
+        alert("Error al eliminar vuelo con reservas asociadas, elimine primero las reservas");
       }
     }
   };
