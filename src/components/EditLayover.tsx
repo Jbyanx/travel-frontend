@@ -21,9 +21,7 @@ interface Layover {
   id: number;
   aeropuerto: Airport;
   idVuelo: number;
-  duracion: {
-    seconds: number;
-  };
+  duracion: string;
 }
 
 interface EditLayoverProps {
@@ -38,7 +36,7 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
   const [layoverData, setLayoverData] = useState({
     idVuelo: layover.idVuelo,
     idAeropuerto: layover.aeropuerto.id,
-    duracion: Math.floor(layover.duracion.seconds / 60)
+    duracion: layover.duracion
   });
   const [airports, setAirports] = useState<Airport[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -66,7 +64,7 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
     fetchAirportsAndFlights();
   }, [api, setError]);
 
-  const handleChange = (name: string, value: number) => {
+  const handleChange = (name: string, value: string | number) => {
     setLayoverData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -81,7 +79,7 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
     const updateLayoverData = {
       idVuelo: layoverData.idVuelo,
       idAeropuerto: layoverData.idAeropuerto,
-      duracion: `PT${layoverData.duracion}M`
+      duracion: layoverData.duracion
     };
 
     try {
@@ -146,12 +144,11 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
         <div>
           <Label htmlFor="duracion">Duración de la Escala (en minutos)</Label>
           <Input
-            type="number"
+            type="text"
             id="duracion"
             value={layoverData.duracion}
-            onChange={(e) => handleChange('duracion', parseInt(e.target.value))}
+            onChange={(e) => handleChange('duracion', e.target.value)}
             required
-            min={1}
           />
         </div>
 

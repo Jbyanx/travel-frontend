@@ -17,9 +17,7 @@ interface Layover {
     pais: string;
   };
   idVuelo: number;
-  duracion: {
-    seconds: number;
-  };
+  duracion: string;
 }
 
 interface LayoverListProps {
@@ -99,7 +97,7 @@ export function LayoverList({ api, setError }: LayoverListProps) {
             <TableRow>
               <TableHead>ID de Vuelo</TableHead>
               <TableHead>Aeropuerto</TableHead>
-              <TableHead>Duración (segundos)</TableHead>
+              <TableHead>Duración (minutos)</TableHead>
               {userRole === 'ROLE_ADMIN' && <TableHead>Acciones</TableHead>}
             </TableRow>
           </TableHeader>
@@ -108,7 +106,7 @@ export function LayoverList({ api, setError }: LayoverListProps) {
               <TableRow key={layover.id}>
                 <TableCell>{layover.idVuelo}</TableCell>
                 <TableCell>{layover.aeropuerto.nombre} ({layover.aeropuerto.ciudad}, {layover.aeropuerto.pais})</TableCell>
-                <TableCell>{layover.duracion.seconds}</TableCell>
+                <TableCell>{layover.duracion}</TableCell>
                 {userRole === 'ROLE_ADMIN' && (
                   <TableCell>
                     <Button variant="outline" size="sm" onClick={() => {

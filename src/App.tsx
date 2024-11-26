@@ -1,7 +1,7 @@
 import React from 'react';
 import './styles/globals.css';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from './components/contexts/AuthContext';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './components/contexts/AuthContext';
 import Navigation from './components/Navigation';
 import { Login } from './components/Login';
 import { Signup as SignupForm } from './components/SignUpForm';
@@ -10,7 +10,20 @@ import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 import PromotionsAndOffers from './components/PromotionsAndOffers';
 import PopularDestinations from './components/PopularDestinations';
-import ProtectedRoute from './components/ProtectedRoute';
+
+const ProtectedRoute: React.FC<{ element: React.ReactElement, allowedRole: string }> = ({ element, allowedRole }) => {
+  const { isLoggedIn, userRole } = useAuth();
+  
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (userRole !== allowedRole) {
+    return <Navigate to={userRole === 'ROLE_ADMIN' ? '/admin' : '/dashboard'} replace />;
+  }
+
+  return element;
+};
 
 const Hero = () => (
   <div className="relative bg-gray-900 overflow-hidden">
@@ -71,23 +84,13 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignupForm />} />
-
-            {/* Rutas protegidas */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute roleRequired="ROLE_USER">
-                  <UserDashboard />
-                </ProtectedRoute>
-              }
+            <Route 
+              path="/dashboard" 
+              element={<ProtectedRoute element={<UserDashboard />} allowedRole="ROLE_USER" />} 
             />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute roleRequired="ROLE_ADMIN">
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
+            <Route 
+              path="/admin" 
+              element={<ProtectedRoute element={<AdminDashboard />} allowedRole="ROLE_ADMIN" />} 
             />
           </Routes>
           <Footer />

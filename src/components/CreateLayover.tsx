@@ -28,7 +28,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
   const [layoverData, setLayoverData] = useState({
     idVuelo: 0,
     idAeropuerto: 0,
-    duracion: 0
+    duracion: ''
   });
   const [airports, setAirports] = useState<Airport[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -56,7 +56,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
     fetchAirportsAndFlights();
   }, [api, setError]);
 
-  const handleChange = (name: string, value: number) => {
+  const handleChange = (name: string, value: string | number) => {
     setLayoverData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -71,7 +71,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
     const saveLayoverData = {
       idVuelo: layoverData.idVuelo,
       idAeropuerto: layoverData.idAeropuerto,
-      duracion: `PT${layoverData.duracion}M`
+      duracion: layoverData.duracion
     };
 
     try {
@@ -82,7 +82,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
       setLayoverData({
         idVuelo: 0,
         idAeropuerto: 0,
-        duracion: 0
+        duracion: ''
       });
       onSuccess();
     } catch (error) {
@@ -130,8 +130,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
             </SelectTrigger>
             <SelectContent>
               {airports.map((airport) => (
-                <SelectItem key={airport.
-id} value={airport.id.toString()}>
+                <SelectItem key={airport.id} value={airport.id.toString()}>
                   {airport.nombre}
                 </SelectItem>
               ))}
@@ -142,12 +141,11 @@ id} value={airport.id.toString()}>
         <div>
           <Label htmlFor="duracion">Duración de la Escala (en minutos)</Label>
           <Input
-            type="number"
+            type="text"
             id="duracion"
             value={layoverData.duracion}
-            onChange={(e) => handleChange('duracion', parseInt(e.target.value))}
+            onChange={(e) => handleChange('duracion', e.target.value)}
             required
-            min={1}
           />
         </div>
 

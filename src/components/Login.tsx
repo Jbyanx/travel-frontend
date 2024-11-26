@@ -31,8 +31,17 @@ export const Login: React.FC = () => {
     try {
       const response = await axios.post<JwtResponse>('http://localhost:8080/api/v1/auth/login', formData);
       console.log('Login response:', response.data);
-      login(response.data.token, response.data.roles);
-      if (response.data.roles.includes('ROLE_ADMIN')) {
+      
+      // If roles is empty, assign a default role
+      const roles = response.data.roles.length > 0 ? response.data.roles[0] : ['ROLE_USER'];
+      
+      // Note: We're assigning a default role if the backend returns an empty array.
+      // This is a temporary solution and should be addressed with the backend team.
+      
+      login(response.data.token, roles, response.data.email);
+      
+      // Redirect based on email for admin, or use the first role for other users
+      if (response.data.email === 'admin@admin.com') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
@@ -91,4 +100,3 @@ export const Login: React.FC = () => {
     </div>
   );
 };
-
