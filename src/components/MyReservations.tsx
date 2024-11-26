@@ -30,7 +30,7 @@ export function MyReservations({ api, setError }: MyReservationsProps) {
 
   const fetchReservations = async () => {
     try {
-      const response = await api.get('/reservas');
+      const response = await api.get('/reservas/misreservas');
       setReservations(response.data);
     } catch (error) {
       setError('Failed to fetch reservations');

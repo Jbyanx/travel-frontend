@@ -7,18 +7,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 interface Flight {
   id: number;
-  flightNumber: string;
-  origin: string;
-  destination: string;
+  origen: string;
+  destino: string;
+  fechaDeSalida: string;
+  horaDeSalida: string;
+  duracion: string;
+  capacidad: number;
+  aerolinea: string;
+  aeropuertoOrigen: string;
+  aeropuertoDestino: string;
+  escalas: any[]; 
 }
+
 
 interface ReservationFormProps {
   api: AxiosInstance;
   setError: (error: string | null) => void;
+  idCliente: number;
   onSuccess?: () => void;
 }
 
-export function ReservationForm({ api, setError, onSuccess }: ReservationFormProps) {
+export function ReservationForm({ api, setError, idCliente, onSuccess }: ReservationFormProps) {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [selectedFlight, setSelectedFlight] = useState<number | null>(null);
   const [passengerCount, setPassengerCount] = useState<number>(1);
@@ -42,10 +51,15 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
       setError('Por favor, selecciona un vuelo');
       return;
     }
+    if(!idCliente){
+      setError('El cliente debe estar identificado');
+      return;
+    }
     try {
       await api.post('/reservas', {
+        idCliente: idCliente,
         idVuelo: selectedFlight,
-        fechaDeReserva: new Date().toISOString().split('T')[0],
+        //fechaDeViaje: new Date().toISOString().split('T')[0],
         numeroDePasajeros: passengerCount
       });
       setError(null);
@@ -77,7 +91,7 @@ export function ReservationForm({ api, setError, onSuccess }: ReservationFormPro
           <SelectContent className="bg-white shadow-lg rounded-md">
             {flights.map((flight) => (
               <SelectItem key={flight.id} value={flight.id.toString()}>
-                {flight.flightNumber} - {flight.origin} a {flight.destination}
+                {flight.origen} a {flight.destino}  {flight.fechaDeSalida}
               </SelectItem>
             ))}
           </SelectContent>
