@@ -26,15 +26,30 @@ interface Vuelo {
   id: number;
   origen: string;
   destino: string;
-  fechaSalida: string;
-  horaSalida: string;
+  fechaDeSalida: string;
+  horaDeSalida: string;
   duracion: string;
   capacidad: number;
   aerolinea: string;
-  aeropuertoOrigen: Airport;
-  aeropuertoDestino: Airport;
+  aeropuertoOrigen: string;  // Cambiado a string
+  aeropuertoDestino: string; // Cambiado a string
   escalas: Escala[];
 }
+
+// Función para formatear la fecha
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return isNaN(date.getTime()) ? "Fecha inválida" : date.toLocaleDateString();
+};
+
+// Función para formatear la hora
+const formatTime = (timeString: string) => {
+  const timeParts = timeString.split(':');
+  if (timeParts.length === 3) {
+    return `${timeParts[0]}:${timeParts[1]}:${timeParts[2]}`;
+  }
+  return "Hora inválida";
+};
 
 export function FlightList({ api, setError }: { api: any; setError: React.Dispatch<React.SetStateAction<string | null>> }) {
   const [vuelos, setVuelos] = useState<Vuelo[]>([]);
@@ -51,7 +66,15 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
   const fetchVuelos = async () => {
     try {
       const response = await api.get('/vuelos');
-      setVuelos(response.data);
+      const vuelosWithFormattedDates = response.data.map((vuelo: Vuelo) => ({
+        ...vuelo,
+        // Transforma los aeropuertos de cadena a objetos
+        aeropuertoOrigen: { nombre: vuelo.aeropuertoOrigen, ciudad: 'Desconocida', pais: 'Desconocido' },
+        aeropuertoDestino: { nombre: vuelo.aeropuertoDestino, ciudad: 'Desconocida', pais: 'Desconocido' },
+        fechaDeSalida: formatDate(vuelo.fechaDeSalida),
+        horaDeSalida: formatTime(vuelo.horaDeSalida),
+      }));
+      setVuelos(vuelosWithFormattedDates);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -104,59 +127,62 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
         )}
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Vuelo origen</TableHead>
-              <TableHead>Vuelo destino</TableHead>
-              <TableHead>Fecha de salida</TableHead>
-              <TableHead>Hora de salida</TableHead>
-              <TableHead>Aerolínea</TableHead>
-              <TableHead>Aeropuerto origen</TableHead>
-              <TableHead>Aeropuerto destino</TableHead>
-              <TableHead>Duracion / Escala</TableHead>
-              {userRole === 'ROLE_ADMIN' && <TableHead>Acciones</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {vuelos.map((vuelo) => ( 
-              <React.Fragment key={vuelo.id}>
-                <TableRow>
-                  <TableCell>{vuelo.origen}</TableCell>
-                  <TableCell>{vuelo.destino}</TableCell>
-                  <TableCell>{vuelo.fechaSalida}</TableCell>
-                  <TableCell>{vuelo.horaSalida}</TableCell>
-                  <TableCell>{vuelo.aerolinea}</TableCell>
-                  <TableCell>{vuelo.aeropuertoOrigen.nombre} ({vuelo.aeropuertoOrigen.ciudad}, {vuelo.aeropuertoOrigen.pais})</TableCell>
-                  <TableCell>{vuelo.aeropuertoDestino.nombre} ({vuelo.aeropuertoDestino.ciudad}, {vuelo.aeropuertoDestino.pais})</TableCell>
-                  <TableCell>{vuelo.escalas.length > 0 ? `${vuelo.escalas.length} escalas(s)` : `Duración: ${vuelo.duracion}`}</TableCell>
-                  {userRole === 'ROLE_ADMIN' && (
-                    <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => {
-                        setEditingVuelo(vuelo);
-                        setIsEditDialogOpen(true);
-                      }}>
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDelete(vuelo.id)} className="ml-2">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </TableCell>
-                  )}
-                </TableRow>
-                {vuelo.escalas.map((escala) => (
-                  <TableRow key={`escala-${escala.id}`}>
-                    <TableCell colSpan={8}>
-                      Escala en {escala.aeropuerto.nombre} ({escala.aeropuerto.ciudad}, {escala.aeropuerto.pais}) - Duración: {escala.duracion}
-                    </TableCell>
+        {/* Contenedor con scroll horizontal */}
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Ciudad origen</TableHead>
+                <TableHead>Ciudad destino</TableHead>
+                <TableHead>Fecha de salida</TableHead>
+                <TableHead>Hora de salida</TableHead>
+                <TableHead>Aerolínea</TableHead>
+                <TableHead>Aeropuerto origen</TableHead>
+                <TableHead>Aeropuerto destino</TableHead>
+                <TableHead>Duracion / Escala</TableHead>
+                {userRole === 'ROLE_ADMIN' && <TableHead>Acciones</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {vuelos.map((vuelo) => ( 
+                <React.Fragment key={vuelo.id}>
+                  <TableRow>
+                    <TableCell>{vuelo.origen}</TableCell>
+                    <TableCell>{vuelo.destino}</TableCell>
+                    <TableCell>{vuelo.fechaDeSalida}</TableCell>
+                    <TableCell>{vuelo.horaDeSalida}</TableCell>
+                    <TableCell>{vuelo.aerolinea}</TableCell>
+                    <TableCell>{vuelo.aeropuertoOrigen.nombre}</TableCell>
+                    <TableCell>{vuelo.aeropuertoDestino.nombre}</TableCell>
+                    <TableCell>{vuelo.escalas.length > 0 ? `${vuelo.escalas.length} escalas(s)` : `Duración: ${vuelo.duracion}`}</TableCell>
+                    {userRole === 'ROLE_ADMIN' && (
+                      <TableCell>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setEditingVuelo(vuelo);
+                          setIsEditDialogOpen(true);
+                        }}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Editar
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleDelete(vuelo.id)} className="ml-2">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
-                ))}
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
+                  {vuelo.escalas.map((escala) => (
+                    <TableRow key={`escala-${escala.id}`}>
+                      <TableCell colSpan={8}>
+                        Escala en {escala.aeropuerto.nombre} ({escala.aeropuerto.ciudad}, {escala.aeropuerto.pais}) - Duración: {escala.duracion}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
       {userRole === 'ROLE_ADMIN' && (
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -179,8 +205,8 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
         </Dialog>
       )}
     </Card>
+
   );
 }
 
 export default FlightList;
-
