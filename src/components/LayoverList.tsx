@@ -10,14 +10,22 @@ import EditLayover from './EditLayover';
 
 interface Layover {
   id: number;
-  aeropuerto: {
-    id: number;
-    nombre: string;
-    ciudad: string;
-    pais: string;
-  };
-  idVuelo: number;
+  idAeropuerto: number; // El id del aeropuerto en la escala
+  idVuelo: number;      // El id del vuelo en la escala
   duracion: string;
+}
+
+interface Aeropuerto {
+  id: number;           // Ahora el id se llama simplemente 'id'
+  nombre: string;
+  ciudad: string;
+  pais: string;
+}
+
+interface Vuelo {
+  id: number;           // Ahora el id se llama simplemente 'id'
+  origen: string;
+  destino: string;
 }
 
 interface LayoverListProps {
@@ -27,6 +35,8 @@ interface LayoverListProps {
 
 export function LayoverList({ api, setError }: LayoverListProps) {
   const [layovers, setLayovers] = useState<Layover[]>([]);
+  const [aeropuertos, setAeropuertos] = useState<Record<number, Aeropuerto>>({});
+  const [vuelos, setVuelos] = useState<Record<number, Vuelo>>({});
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -35,22 +45,61 @@ export function LayoverList({ api, setError }: LayoverListProps) {
 
   useEffect(() => {
     fetchLayovers();
+    fetchAeropuertos();
+    fetchVuelos();
   }, []);
 
   const fetchLayovers = async () => {
+    setLoading(true);
     try {
       const response = await api.get('/escalas');
       setLayovers(response.data);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching layovers:', error);
       setError('Failed to fetch layovers');
+    } finally {
       setLoading(false);
     }
   };
 
+  const fetchAeropuertos = async () => {
+    try {
+      const response = await api.get('/aeropuertos');
+      const aeropuertosData = response.data.reduce((acc: Record<number, Aeropuerto>, aeropuerto: Aeropuerto) => {
+        acc[aeropuerto.id] = aeropuerto; 
+        return acc;
+      }, {});
+      setAeropuertos(aeropuertosData);
+    } catch (error) {
+      console.error('Error fetching aeropuertos:', error);
+      setError('Failed to fetch aeropuertos');
+    }
+  };
+
+  const fetchVuelos = async () => {
+    try {
+      const response = await api.get('/vuelos');
+      const vuelosData = response.data.reduce((acc: Record<number, Vuelo>, vuelo: Vuelo) => {
+        acc[vuelo.id] = vuelo; 
+        return acc;
+      }, {});
+      setVuelos(vuelosData);
+    } catch (error) {
+      console.error('Error fetching vuelos:', error);
+      setError('Failed to fetch vuelos');
+    }
+  };
+
+  const formatDuration = (duration: string) => {
+    const hoursMatch = duration.match(/PT(\d+)H/);
+    const minutesMatch = duration.match(/(\d+)M/);
+    const hours = hoursMatch ? `${hoursMatch[1]}h` : '';
+    const minutes = minutesMatch ? `${minutesMatch[1]}m` : '';
+    return `${hours} ${minutes}`.trim();
+  };
+
   const handleDelete = async (id: number) => {
-    if (window.confirm('¿Estas seguro de eliminar esta escala?')) {
+    if (window.confirm('¿Estás seguro de eliminar esta escala?')) {
       try {
         await api.delete(`/escalas/${id}`);
         setError(null);
@@ -58,6 +107,7 @@ export function LayoverList({ api, setError }: LayoverListProps) {
       } catch (error) {
         console.error('Error deleting layover:', error);
         setError('Failed to delete layover. Please try again later.');
+        alert("Error al eliminar escala con alguna entidad relacionada");
       }
     }
   };
@@ -79,9 +129,9 @@ export function LayoverList({ api, setError }: LayoverListProps) {
               <DialogHeader>
                 <DialogTitle>Crear Nueva Escala</DialogTitle>
               </DialogHeader>
-              <CreateLayover 
+              <CreateLayover
                 api={api}
-                setError={setError} 
+                setError={setError}
                 onSuccess={() => {
                   setIsCreateDialogOpen(false);
                   fetchLayovers();
@@ -95,35 +145,52 @@ export function LayoverList({ api, setError }: LayoverListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID de Vuelo</TableHead>
+              <TableHead>Vuelo</TableHead>
               <TableHead>Aeropuerto</TableHead>
-              <TableHead>Duración (minutos)</TableHead>
+              <TableHead>Duración</TableHead>
               {userRole === 'ROLE_ADMIN' && <TableHead>Acciones</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {layovers.map((layover) => (
-              <TableRow key={layover.id}>
-                <TableCell>{layover.idVuelo}</TableCell>
-                <TableCell>{layover.aeropuerto.nombre} ({layover.aeropuerto.ciudad}, {layover.aeropuerto.pais})</TableCell>
-                <TableCell>{layover.duracion}</TableCell>
-                {userRole === 'ROLE_ADMIN' && (
+            {layovers.map((layover) => {
+              const aeropuerto = aeropuertos[layover.idAeropuerto]; // Usamos idAeropuerto
+              const vuelo = vuelos[layover.idVuelo]; // Usamos idVuelo
+              return (
+                <TableRow key={layover.id}>
                   <TableCell>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      setEditingLayover(layover);
-                      setIsEditDialogOpen(true);
-                    }}>
-                      <Pencil className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(layover.id)} className="ml-2">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
+                    {vuelo ? `${vuelo.origen} - ${vuelo.destino}` : 'Cargando Vuelo...'}
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
+                  <TableCell>
+                    {aeropuerto ? `${aeropuerto.nombre} (${aeropuerto.ciudad}, ${aeropuerto.pais})` : 'Cargando Aeropuerto...'}
+                  </TableCell>
+                  <TableCell>{formatDuration(layover.duracion)}</TableCell>
+                  {userRole === 'ROLE_ADMIN' && (
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingLayover(layover);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(layover.id)}
+                        className="ml-2"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>
@@ -152,4 +219,3 @@ export function LayoverList({ api, setError }: LayoverListProps) {
 }
 
 export default LayoverList;
-

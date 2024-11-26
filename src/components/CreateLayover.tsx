@@ -60,6 +60,16 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
     setLayoverData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Función para convertir minutos a formato ISO 8601
+  const convertToISO8601Duration = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (hours > 0) {
+      return `PT${hours}H${remainingMinutes > 0 ? remainingMinutes + 'M' : ''}`;
+    }
+    return `PT${remainingMinutes}M`; // Solo minutos si no hay horas
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,10 +78,19 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
       return;
     }
 
+    // Convertir la duración de minutos a formato ISO 8601
+    const duracionEnMinutos = parseInt(layoverData.duracion, 10);
+    if (isNaN(duracionEnMinutos) || duracionEnMinutos <= 0) {
+      setLocalError('Por favor, ingrese una duración válida en minutos.');
+      return;
+    }
+
+    const formattedDuracion = convertToISO8601Duration(duracionEnMinutos);
+
     const saveLayoverData = {
       idVuelo: layoverData.idVuelo,
       idAeropuerto: layoverData.idAeropuerto,
-      duracion: layoverData.duracion
+      duracion: formattedDuracion // Duración en formato ISO 8601
     };
 
     try {
@@ -85,8 +104,17 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
         duracion: ''
       });
       onSuccess();
-    } catch (error) {
-      setError('Error al crear la escala.');
+    } catch (error: any) {
+      if (error.response && error.response.status === 409) {
+        const backendMessage = error.response.data.message;
+        const errorMessage = backendMessage.includes("duplicate key")
+          ? "Ya existe una escala con los mismos datos, por favor verifica los campos."
+          : "Ya existe una escala con los mismos datos de vuelo, por favor verifica los campos.";
+
+        setLocalError(errorMessage);
+      } else {
+        setLocalError('Error al crear la escala.');
+      }
     }
   };
 
@@ -109,7 +137,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
             <SelectTrigger>
               <SelectValue placeholder="Seleccione un vuelo" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={`max-h-[300px] ${flights.length > 5 ? 'overflow-y-auto' : ''}`}>
               {flights.map((flight) => (
                 <SelectItem key={flight.id} value={flight.id.toString()}>
                   {flight.origen} - {flight.destino}
@@ -128,7 +156,7 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
             <SelectTrigger>
               <SelectValue placeholder="Seleccione aeropuerto de escala" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className={`max-h-[300px] ${airports.length > 5 ? 'overflow-y-auto' : ''}`}>
               {airports.map((airport) => (
                 <SelectItem key={airport.id} value={airport.id.toString()}>
                   {airport.nombre}
@@ -158,4 +186,3 @@ const CreateLayover: React.FC<CreateLayoverProps> = ({ api, setError, onSuccess 
 };
 
 export default CreateLayover;
-
