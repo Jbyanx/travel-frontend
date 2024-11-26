@@ -43,7 +43,7 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
     destino: vuelo.destino,
     fechaDeSalida: vuelo.fechaDeSalida,
     horaDeSalida: vuelo.horaDeSalida,
-    duracion: parseInt(vuelo.duracion.replace(/\D/g, '')),
+    duracion: parseInt(vuelo.duracion.replace(/\D/g, '')) || 0,
     capacidad: vuelo.capacidad,
     idAerolinea: 0,
     idAeropuertoOrigen: 0,
@@ -146,7 +146,7 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
             <SelectTrigger>
               <SelectValue placeholder="Seleccione una aerolínea" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ maxHeight: '200px', overflowY: 'auto' }}>
               {airlines.map((airline) => (
                 <SelectItem key={airline.id} value={airline.id.toString()}>
                   {airline.nombre}
@@ -168,7 +168,7 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
             <SelectTrigger>
               <SelectValue placeholder="Seleccione aeropuerto de origen" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ maxHeight: '200px', overflowY: 'auto' }}>
               {airports.map((airport) => (
                 <SelectItem key={airport.id} value={airport.id.toString()}>
                   {airport.nombre}
@@ -190,7 +190,7 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
             <SelectTrigger>
               <SelectValue placeholder="Seleccione aeropuerto de destino" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent style={{ maxHeight: '200px', overflowY: 'auto' }}>
               {airports.map((airport) => (
                 <SelectItem 
                   key={airport.id} 
@@ -234,7 +234,6 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
             value={flightData.duracion}
             onChange={(e) => handleChange('duracion', parseInt(e.target.value))}
             required
-            min={1}
           />
         </div>
 
@@ -246,17 +245,15 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
             value={flightData.capacidad}
             onChange={(e) => handleChange('capacidad', parseInt(e.target.value))}
             required
-            min={1}
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          Actualizar Vuelo
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit">Actualizar Vuelo</Button>
+        </div>
       </form>
     </div>
   );
 };
 
 export default EditVuelo;
-

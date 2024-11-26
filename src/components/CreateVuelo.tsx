@@ -17,6 +17,18 @@ interface Airport {
   nombre: string;
 }
 
+interface Flight {
+  origen: string;
+  destino: string;
+  fechaDeSalida: string;
+  horaDeSalida: string;
+  duracion: string;
+  capacidad: number;
+  idAerolinea: number;
+  idAeropuertoOrigen: number;
+  idAeropuertoDestino: number;
+}
+
 const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateAction<string | null>> }) => {
   const { token, userRole } = useAuth();
   const [flightData, setFlightData] = useState({
@@ -33,6 +45,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
   const [airlines, setAirlines] = useState<Airline[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [flights, setFlights] = useState<Flight[]>([]); // Nuevo estado para los vuelos
 
   const api = axios.create({
     baseURL: 'http://localhost:8080/api/v1',
@@ -98,6 +111,11 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
       const response = await api.post('/vuelos', saveVueloData);
       console.log('Vuelo creado exitosamente:', response.data);
       alert('Vuelo creado con éxito');
+
+      // Agregar el vuelo creado a la lista de vuelos
+      setFlights(prevFlights => [...prevFlights, response.data]);
+
+      // Limpiar los campos del formulario
       setFlightData({
         origen: '',
         destino: '',
@@ -141,7 +159,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
             <SelectTrigger className="bg-white text-black">
               <SelectValue placeholder="Seleccione una aerolínea" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               {airlines.map((airline) => (
                 <SelectItem key={airline.id} value={airline.id.toString()}>
                   {airline.nombre}
@@ -164,7 +182,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
             <SelectTrigger className="bg-white text-black">
               <SelectValue placeholder="Seleccione aeropuerto de origen" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               {airports.map((airport) => (
                 <SelectItem key={airport.id} value={airport.id.toString()}>
                   {airport.nombre}
@@ -187,13 +205,9 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
             <SelectTrigger className="bg-white text-black">
               <SelectValue placeholder="Seleccione aeropuerto de destino" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto">
               {airports.map((airport) => (
-                <SelectItem 
-                  key={airport.id} 
-                  value={airport.id.toString()}
-                  disabled={airport.id === flightData.idAeropuertoOrigen}
-                >
+                <SelectItem key={airport.id} value={airport.id.toString()}>
                   {airport.nombre}
                 </SelectItem>
               ))}
@@ -201,6 +215,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
           </Select>
         </div>
 
+        {/* Resto del formulario */}
         <div>
           <Label htmlFor="fechaDeSalida">Fecha de Salida</Label>
           <Input
@@ -224,14 +239,14 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
         </div>
 
         <div>
-          <Label htmlFor="duracion">Duración (en minutos)</Label>
+          <Label htmlFor="duracion">Duración (minutos)</Label>
           <Input
             type="number"
             id="duracion"
             value={flightData.duracion}
-            onChange={(e) => handleChange('duracion', parseInt(e.target.value))}
+            onChange={(e) => handleChange('duracion', Number(e.target.value))}
+            min="0"
             required
-            min={1}
           />
         </div>
 
@@ -241,13 +256,13 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
             type="number"
             id="capacidad"
             value={flightData.capacidad}
-            onChange={(e) => handleChange('capacidad', parseInt(e.target.value))}
+            onChange={(e) => handleChange('capacidad', Number(e.target.value))}
+            min="1"
             required
-            min={1}
           />
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="mt-4">
           Crear Vuelo
         </Button>
       </form>
@@ -256,4 +271,3 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
 };
 
 export default CreateVuelo;
-
