@@ -36,7 +36,7 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
   const [layoverData, setLayoverData] = useState({
     idVuelo: layover?.idVuelo || 0,
     idAeropuerto: layover?.aeropuerto?.id || 0,
-    duracion: layover?.duracion || '' // Mantenemos la duración como número de minutos
+    duracion: layover?.duracion || ''
   });
   const [airports, setAirports] = useState<Airport[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
@@ -113,7 +113,6 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
     }
   };
 
-  // Verificar si `layover` está definido antes de renderizar
   if (!layover) {
     return <div>No se encontró la escala para editar.</div>;
   }
@@ -151,7 +150,7 @@ const EditLayover: React.FC<EditLayoverProps> = ({ api, setError, layover, onSuc
           <Label htmlFor="idAeropuerto">Aeropuerto de Escala</Label>
           <Select
             onValueChange={(value) => handleChange('idAeropuerto', parseInt(value, 10))}
-            value={layoverData.idAeropuerto.toString()} // Aseguramos que el valor del select esté sincronizado
+            value={layoverData.idAeropuerto.toString()} 
           >
             <SelectTrigger>
               <SelectValue placeholder="Seleccione aeropuerto de escala" />

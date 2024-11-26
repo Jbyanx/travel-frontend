@@ -69,7 +69,6 @@ const EditVuelo: React.FC<EditVueloProps> = ({ api, setError, vuelo, onSuccess }
         setAirlines(airlineResponse.data);
         setAirports(airportResponse.data);
 
-        // Set initial values for airline and airports
         const selectedAirline = airlineResponse.data.find((a: Airline) => a.nombre === vuelo.aerolinea);
         const selectedOriginAirport = airportResponse.data.find((a: Airport) => a.nombre === vuelo.aeropuertoOrigen);
         const selectedDestinationAirport = airportResponse.data.find((a: Airport) => a.nombre === vuelo.aeropuertoDestino);

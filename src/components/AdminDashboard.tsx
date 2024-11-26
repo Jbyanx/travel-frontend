@@ -7,6 +7,7 @@ import { AirportList } from './AirportList';
 import { AirlineList } from './AirlineList';
 import { FlightList } from './FlightList';
 import { LayoverList } from './LayoverList';
+import { MyReservations } from './MyReservations'; 
 import { Navigate } from 'react-router-dom';
 
 export function AdminDashboard() {
@@ -16,9 +17,9 @@ export function AdminDashboard() {
   const api = axios.create({
     baseURL: 'http://localhost:8080/api/v1',
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`, 
     },
-});
+  });
 
   if (!userRole || !userRole.includes('ROLE_ADMIN')) {
     return (
@@ -48,6 +49,7 @@ export function AdminDashboard() {
           <TabsTrigger value="layovers">Escalas</TabsTrigger>
           <TabsTrigger value="airports">Aeropuertos</TabsTrigger>
           <TabsTrigger value="airlines">Aerolíneas</TabsTrigger>
+          <TabsTrigger value="reservas">Reservas</TabsTrigger> 
         </TabsList>
 
         <TabsContent value="flights">
@@ -65,10 +67,13 @@ export function AdminDashboard() {
         <TabsContent value="airlines">
           <AirlineList api={api} setError={setError} />
         </TabsContent>
+
+        <TabsContent value="reservas">
+          <MyReservations api={api} setError={setError} userRole={userRole} />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
 
 export default AdminDashboard;
-

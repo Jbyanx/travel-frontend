@@ -14,21 +14,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [userRole, setUserRole] = useState<string | null>(localStorage.getItem('userRole'));
-  const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem('userEmail'));
 
-  const login = (newToken: string, role: string, email: string) => {
-    setToken(newToken);
-    setUserRole(role);
-    setUserEmail(email);
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userEmail', email);
+  const login = (newToken: string, idCliente: number, roles: string[]) => {
+    try {
+      setToken(newToken);
+      setUserRole(roles[0] || null);
+  
+      localStorage.setItem('token', newToken);
+      localStorage.setItem('userRole', roles[0] || "");
+      localStorage.setItem('idCliente', String(idCliente));
+  
+    } catch (error) {
+      console.error("Error al procesar el login:", error);
+      throw error;
+    }
   };
+  
 
   const logout = () => {
     setToken(null);
     setUserRole(null);
-    setUserEmail(null);
     localStorage.removeItem('token');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userEmail');
@@ -39,16 +44,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedRole = localStorage.getItem('userRole');
-    const storedEmail = localStorage.getItem('userEmail');
     if (storedToken && storedRole && storedEmail) {
       setToken(storedToken);
       setUserRole(storedRole);
-      setUserEmail(storedEmail);
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, userRole, userEmail, login, logout, isLoggedIn }}>
+    <AuthContext.Provider value={{ token, userRole, login, logout, isLoggedIn }}>
       {children}
     </AuthContext.Provider>
   );

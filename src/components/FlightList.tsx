@@ -36,13 +36,11 @@ interface Vuelo {
   escalas: Escala[];
 }
 
-// Función para formatear la fecha
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return isNaN(date.getTime()) ? "Fecha inválida" : date.toLocaleDateString();
 };
 
-// Función para formatear la hora
 const formatTime = (timeString: string) => {
   const timeParts = timeString.split(':');
   if (timeParts.length === 3) {
@@ -68,7 +66,6 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
       const response = await api.get('/vuelos');
       const vuelosWithFormattedDates = response.data.map((vuelo: Vuelo) => ({
         ...vuelo,
-        // Transforma los aeropuertos de cadena a objetos
         aeropuertoOrigen: { nombre: vuelo.aeropuertoOrigen, ciudad: 'Desconocida', pais: 'Desconocido' },
         aeropuertoDestino: { nombre: vuelo.aeropuertoDestino, ciudad: 'Desconocida', pais: 'Desconocido' },
         fechaDeSalida: formatDate(vuelo.fechaDeSalida),
@@ -127,7 +124,6 @@ export function FlightList({ api, setError }: { api: any; setError: React.Dispat
         )}
       </CardHeader>
       <CardContent>
-        {/* Contenedor con scroll horizontal */}
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

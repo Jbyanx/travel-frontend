@@ -1,5 +1,4 @@
 import React from 'react'
-import { Button } from "./ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/Card"
 
 const PromotionsAndOffers: React.FC = () => {

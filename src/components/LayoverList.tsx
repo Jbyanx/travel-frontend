@@ -16,14 +16,14 @@ interface Layover {
 }
 
 interface Aeropuerto {
-  id: number;           // Ahora el id se llama simplemente 'id'
+  id: number;           
   nombre: string;
   ciudad: string;
   pais: string;
 }
 
 interface Vuelo {
-  id: number;           // Ahora el id se llama simplemente 'id'
+  id: number;           
   origen: string;
   destino: string;
 }
@@ -153,8 +153,8 @@ export function LayoverList({ api, setError }: LayoverListProps) {
           </TableHeader>
           <TableBody>
             {layovers.map((layover) => {
-              const aeropuerto = aeropuertos[layover.idAeropuerto]; // Usamos idAeropuerto
-              const vuelo = vuelos[layover.idVuelo]; // Usamos idVuelo
+              const aeropuerto = aeropuertos[layover.idAeropuerto]; 
+              const vuelo = vuelos[layover.idVuelo]; 
               return (
                 <TableRow key={layover.id}>
                   <TableCell>

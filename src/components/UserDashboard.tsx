@@ -9,7 +9,7 @@ import { AirlineList } from './AirlineList';
 import { Navigate } from 'react-router-dom';
 
 export function UserDashboard() {
-  const { token, userRole } = useAuth(); // Consume el AuthContext
+  const { token, userRole } = useAuth(); 
   const [error, setError] = useState<string | null>(null);
 
   const api = axios.create({
@@ -19,7 +19,6 @@ export function UserDashboard() {
     },
   });
 
-  // Verifica que el rol sea USER antes de permitir el acceso
   if (!userRole || userRole.includes('ROLE_ADMIN')) {
     return (
       <div>

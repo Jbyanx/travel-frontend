@@ -45,7 +45,7 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
   const [airlines, setAirlines] = useState<Airline[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [flights, setFlights] = useState<Flight[]>([]); // Nuevo estado para los vuelos
+  const [flights, setFlights] = useState<Flight[]>([]);
 
   const api = axios.create({
     baseURL: 'http://localhost:8080/api/v1',
@@ -112,10 +112,8 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
       console.log('Vuelo creado exitosamente:', response.data);
       alert('Vuelo creado con éxito');
 
-      // Agregar el vuelo creado a la lista de vuelos
       setFlights(prevFlights => [...prevFlights, response.data]);
 
-      // Limpiar los campos del formulario
       setFlightData({
         origen: '',
         destino: '',
@@ -215,7 +213,6 @@ const CreateVuelo = ({ setError }: { setError: React.Dispatch<React.SetStateActi
           </Select>
         </div>
 
-        {/* Resto del formulario */}
         <div>
           <Label htmlFor="fechaDeSalida">Fecha de Salida</Label>
           <Input
